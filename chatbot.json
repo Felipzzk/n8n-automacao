@@ -1,0 +1,174 @@
+{
+  "name": "Whatsapp Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "webhook",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "d86b47f0-4e44-48b3-bad2-c3204fb02a59",
+      "name": "Webhook",
+      "webhookId": "bd5f9a43-47c3-4c42-ac77-cfcc26d0dd94"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "76acda76-dd8d-498e-92d1-ad6624f7ce3c",
+              "name": "nome",
+              "value": "={{ $json.body.payload._data.Info.PushName }}",
+              "type": "string"
+            },
+            {
+              "id": "0320cf59-4d2a-4d5a-92ba-587d09e18573",
+              "name": "chatId",
+              "value": "={{ $json.body.payload._data.Info.Chat }}",
+              "type": "string"
+            },
+            {
+              "id": "f949021c-e7d9-4815-abc2-1c0113c464b2",
+              "name": "mensagem",
+              "value": "={{ $json.body.payload.body }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        224,
+        0
+      ],
+      "id": "513a1c04-fec4-4566-b90b-b88d01db6fcf",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a whatsapp chatbot. Answer the user message below:\n\nUser: {{ $json.nome }}\nMessage: {{ $json.mensagem }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        448,
+        0
+      ],
+      "id": "735c16fc-27ad-48e4-b2b0-2210e29628e2",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        320,
+        208
+      ],
+      "id": "4a829eac-6c90-45c8-b5a7-36d364a7a6f9",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "CvhuqJzId7sg3NHj",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "Chatting",
+        "operation": "Send Text",
+        "session": "={{ $('Webhook').item.json.body.session }}",
+        "chatId": "={{ $('Edit Fields').item.json.chatId }}",
+        "text": "={{ $json.output }}",
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-waha.WAHA",
+      "typeVersion": 202411,
+      "position": [
+        816,
+        0
+      ],
+      "id": "2d513e47-7d74-485f-82b6-33a5c60c3fdc",
+      "name": "Send a text message",
+      "credentials": {
+        "wahaApi": {
+          "id": "86BbChyLGGtGh6OE",
+          "name": "WAHA account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "010e7355-eb71-4847-94fd-2b01360a1690",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "70f8cdd1c3e6769b8dd69e60063124098f7d8e0aae1c2d7d6a338a930f0273c6"
+  },
+  "nodeGroups": [],
+  "id": "88TAnpb32H1ZgduD",
+  "tags": []
+}
